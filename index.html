@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lucky Number Draw</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles to match React transitions */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        /* Smooth transitions for the ball */
+        #ball {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Animation classes */
+        .animate-pop {
+            animation: pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        @keyframes pop {
+            0% { transform: scale(0.9); opacity: 0.5; }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .glow-active {
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4 font-sans text-white select-none">
+
+    <div class="w-full max-w-md glass-panel rounded-3xl shadow-2xl overflow-hidden flex flex-col">
+        
+        <!-- Header -->
+        <div class="p-6 text-center border-b border-white/10">
+            <h1 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-pink-400 to-violet-400 flex items-center justify-center gap-2">
+                <!-- Trophy Icon -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-yellow-400"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+                Lucky Draw
+            </h1>
+            <p id="status-text" class="text-sm text-slate-400 mt-1">10 numbers remaining</p>
+        </div>
+
+        <!-- Main Stage -->
+        <div class="flex-1 flex flex-col items-center justify-center p-8 min-h-[300px] relative">
+            
+            <!-- The Ball -->
+            <div id="ball" class="relative flex items-center justify-center w-48 h-48 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 shadow-[0_0_40px_rgba(99,102,241,0.5)] border-4 border-white/30 mb-8 opacity-50 scale-90 grayscale">
+                <!-- Glossy Reflection -->
+                <div class="absolute top-4 left-6 w-12 h-6 bg-white/20 rounded-full -rotate-12 blur-sm"></div>
+                
+                <span id="number-display" class="text-8xl font-black text-white drop-shadow-lg transition-all">?</span>
+            </div>
+
+            <!-- Controls -->
+            <div class="flex gap-4 w-full">
+                <button id="draw-btn" class="flex-1 py-4 px-6 rounded-xl font-bold text-lg shadow-lg flex items-center justify-center gap-2 transition-all duration-200 transform active:scale-95 bg-gradient-to-r from-emerald-400 to-cyan-500 hover:from-emerald-300 hover:to-cyan-400 text-slate-900">
+                    <!-- Shuffle Icon -->
+                    <svg id="draw-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 18h1.4c1.3 0 2.5-.6 3.3-1.7l14.2-12.6c.8-1 2-1.7 3.3-1.7H26"/><path d="m22 22 3-3-3-3"/><path d="M2 6h1.4c1.3 0 2.5.6 3.3 1.7l14.2 12.6c.8 1 2 1.7 3.3 1.7H26"/><path d="m22 2 3 3-3 3"/></svg>
+                    <span id="draw-text">Draw Number</span>
+                </button>
+
+                <button id="reset-btn" class="p-4 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors border border-white/10" aria-label="Reset">
+                    <!-- Refresh Icon -->
+                    <svg id="reset-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-400 transition-colors"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- History Grid -->
+        <div class="bg-black/20 p-6">
+            <div class="flex items-center gap-2 mb-4 text-slate-400 text-xs font-bold uppercase tracking-wider">
+                <!-- History Icon -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
+                Number History (1-10)
+            </div>
+            
+            <div id="history-grid" class="grid grid-cols-5 gap-3">
+                <!-- Grid items generated by JS -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State
+        const initialPool = Array.from({ length: 10 }, (_, i) => i + 1);
+        let availableNumbers = [...initialPool];
+        let drawnNumbers = [];
+        let currentNumber = null;
+        let isAnimating = false;
+
+        // DOM Elements
+        const ball = document.getElementById('ball');
+        const numberDisplay = document.getElementById('number-display');
+        const statusText = document.getElementById('status-text');
+        const historyGrid = document.getElementById('history-grid');
+        const drawBtn = document.getElementById('draw-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const resetIcon = document.getElementById('reset-icon');
+        const drawIcon = document.getElementById('draw-icon');
+        const drawText = document.getElementById('draw-text');
+
+        // Render Functions
+        function renderHistory() {
+            historyGrid.innerHTML = '';
+            
+            initialPool.forEach(num => {
+                const isDrawn = drawnNumbers.includes(num);
+                const isCurrent = currentNumber === num;
+                
+                const cell = document.createElement('div');
+                cell.className = `
+                    aspect-square rounded-full flex items-center justify-center font-bold text-sm border-2 transition-all duration-500
+                    ${isCurrent 
+                        ? 'bg-white text-purple-900 border-white scale-110 glow-active z-10' 
+                        : isDrawn 
+                            ? 'bg-purple-600/50 text-white border-purple-500/50' 
+                            : 'bg-slate-800/50 text-slate-600 border-slate-700/50'
+                    }
+                `;
+                cell.textContent = num;
+                historyGrid.appendChild(cell);
+            });
+        }
+
+        function updateUI() {
+            // Update Status Text
+            if (availableNumbers.length === 0) {
+                statusText.textContent = "All numbers drawn!";
+            } else {
+                statusText.textContent = `${availableNumbers.length} numbers remaining`;
+            }
+
+            // Update Ball Style
+            if (currentNumber === null && !isAnimating) {
+                // Initial/Reset State
+                ball.className = "relative flex items-center justify-center w-48 h-48 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 shadow-[0_0_40px_rgba(99,102,241,0.5)] border-4 border-white/30 mb-8 transition-all duration-300 opacity-50 scale-90 grayscale";
+                numberDisplay.textContent = "?";
+            } else {
+                // Active State
+                ball.className = `relative flex items-center justify-center w-48 h-48 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 shadow-[0_0_40px_rgba(99,102,241,0.5)] border-4 border-white/30 mb-8 transition-all duration-300 scale-100 ${isAnimating ? 'animate-bounce' : ''}`;
+                
+                if (!isAnimating) {
+                   numberDisplay.textContent = currentNumber;
+                   // Add a subtle pop effect when number settles
+                   ball.classList.add('animate-pop');
+                   setTimeout(() => ball.classList.remove('animate-pop'), 300);
+                }
+            }
+
+            // Update Draw Button
+            if (availableNumbers.length === 0) {
+                drawBtn.disabled = true;
+                drawBtn.className = "flex-1 py-4 px-6 rounded-xl font-bold text-lg shadow-lg flex items-center justify-center gap-2 transition-all duration-200 bg-slate-700 text-slate-400 cursor-not-allowed";
+                drawText.textContent = "Done";
+                drawIcon.classList.remove('animate-spin');
+            } else {
+                drawBtn.disabled = isAnimating;
+                drawBtn.className = `flex-1 py-4 px-6 rounded-xl font-bold text-lg shadow-lg flex items-center justify-center gap-2 transition-all duration-200 transform active:scale-95 bg-gradient-to-r from-emerald-400 to-cyan-500 hover:from-emerald-300 hover:to-cyan-400 text-slate-900 ${isAnimating ? 'opacity-90 cursor-wait' : ''}`;
+                
+                if (isAnimating) {
+                    drawText.textContent = "Drawing...";
+                    drawIcon.classList.add('animate-spin');
+                } else {
+                    drawText.textContent = "Draw Number";
+                    drawIcon.classList.remove('animate-spin');
+                }
+            }
+
+            // Update Reset Button
+            resetBtn.disabled = isAnimating;
+            if (drawnNumbers.length > 0 && availableNumbers.length > 0) {
+                 resetIcon.classList.replace('text-slate-400', 'text-white');
+            } else if (availableNumbers.length === 0) {
+                 resetIcon.classList.replace('text-slate-400', 'text-white');
+            } else {
+                 resetIcon.classList.replace('text-white', 'text-slate-400');
+            }
+
+            // Update History Grid
+            renderHistory();
+        }
+
+        // Logic
+        function drawNumber() {
+            if (availableNumbers.length === 0 || isAnimating) return;
+
+            isAnimating = true;
+            updateUI(); // Trigger UI update to show animating state
+
+            let counter = 0;
+            const interval = setInterval(() => {
+                const randomPreview = availableNumbers[Math.floor(Math.random() * availableNumbers.length)];
+                numberDisplay.textContent = randomPreview;
+                numberDisplay.classList.add('blur-sm', 'scale-110');
+                counter++;
+                
+                if (counter > 15) {
+                    clearInterval(interval);
+                    finalizeDraw();
+                }
+            }, 50);
+        }
+
+        function finalizeDraw() {
+            const randomIndex = Math.floor(Math.random() * availableNumbers.length);
+            const selected = availableNumbers[randomIndex];
+            
+            // Remove from pool
+            availableNumbers = availableNumbers.filter((_, index) => index !== randomIndex);
+            drawnNumbers.push(selected);
+            currentNumber = selected;
+            
+            isAnimating = false;
+            numberDisplay.classList.remove('blur-sm', 'scale-110');
+            updateUI();
+        }
+
+        function resetGame() {
+            if (isAnimating) return;
+            availableNumbers = [...initialPool];
+            drawnNumbers = [];
+            currentNumber = null;
+            updateUI();
+        }
+
+        // Event Listeners
+        drawBtn.addEventListener('click', drawNumber);
+        resetBtn.addEventListener('click', resetGame);
+
+        // Initial Render
+        renderHistory();
+        // Force initial button state check
+        updateUI();
+
+    </script>
+</body>
+</html>
