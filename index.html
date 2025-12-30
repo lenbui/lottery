@@ -216,10 +216,11 @@
 
     <script>
         // --- Configuration ---
-        const TOTAL_NUMBERS = 15;
+        const TOTAL_NUMBERS = 24;
+        const SHIFT = 37
 
         // --- State ---
-        let pool = Array.from({ length: TOTAL_NUMBERS }, (_, i) => i + 1);
+        let pool = Array.from({ length: TOTAL_NUMBERS }, (_, i) => i + SHIFT);
         let drawn = [];
         let isAnimating = false;
 
@@ -303,7 +304,7 @@
             if (isAnimating) return;
             if (!confirm('Start a new round?')) return;
 
-            pool = Array.from({ length: TOTAL_NUMBERS }, (_, i) => i + 1);
+            pool = Array.from({ length: TOTAL_NUMBERS }, (_, i) => i + SHIFT);
             drawn = [];
             els.mainDisplay.innerText = '?';
 
@@ -343,7 +344,7 @@
             // Drawn numbers are highlighted.
             // justDrawnNum gets a special pop effect.
 
-            const allNumbers = Array.from({ length: TOTAL_NUMBERS }, (_, i) => i + 1);
+            const allNumbers = Array.from({ length: TOTAL_NUMBERS }, (_, i) => i + SHIFT);
 
             allNumbers.forEach(num => {
                 const isDrawn = drawn.includes(num);
